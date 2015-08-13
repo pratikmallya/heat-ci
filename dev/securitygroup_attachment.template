@@ -72,7 +72,7 @@ resources:
 
 
   the_sga:
-    type: OS::Neutron::SecurityGroupAttachment
+    type: Rackspace::Neutron::SecurityGroupAttachment
     properties:
       port: { get_attr: [ server, addresses, public, 0, port ] }
       security_group: {get_resource: the_sg}
