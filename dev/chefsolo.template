@@ -1,0 +1,76 @@
+
+heat_template_version: 2013-05-23
+
+description: |
+  Test template using all resources supported on the Rackspace Public Cloud
+
+parameters:
+
+  devops_flavor:
+    type: string
+    description: Flavor name for the devops server
+    default: 4 GB Performance
+    constraints:
+    - allowed_values:
+      - 4 GB Performance
+      - 4GB Standard Instance
+
+resources:
+
+  random_key_name:
+    type: OS::Heat::RandomString
+    properties:
+      length: 8
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_resource: random_key_name }
+      save_private_key: true
+
+  priv_network:
+    type: Rackspace::Cloud::Network
+    properties:
+      label: kitchen_sink
+      cidr: 192.168.0.0/24
+
+  devops_server:
+    type: OS::Nova::Server
+    properties:
+      name: kitchen_sink_ops01
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      image: 042395fc-728c-4763-86f9-9b0cacb00701 #CentOS 6.5
+      flavor: { get_param: devops_flavor }
+      key_name: { get_resource: access_key }
+      networks:
+      - uuid: "00000000-0000-0000-0000-000000000000"
+      - uuid: "11111111-1111-1111-1111-111111111111"
+      - uuid: { get_resource: priv_network }
+
+  devops_chefsolo_kitchen_centos:
+    type: "OS::Heat::ChefSolo"
+    properties:
+       private_key: {get_attr: [access_key, private_key]}
+       host: {get_attr: [devops_server, accessIPv4]}
+       kitchen: "https://github.com/heat-ci/heat-templates.git"
+       node:
+         hello: "hi"
+
+outputs:
+
+  "Access Private Key":
+    value: { get_attr: [ access_key, private_key ] }
+    description: SSH access private key
+
+  "Dev Ops Server ID":
+    value: { get_resource: devops_server }
+    description: Dev Ops Server ID
+
+  "Random String":
+    value: { get_attr: [ random_key_name, value ] }
+    description: Random String
+
+  "Private Network ID":
+    value: { get_resource: priv_network }
+    description: Private Network ID

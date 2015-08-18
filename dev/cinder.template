@@ -1,0 +1,110 @@
+heat_template_version: 2013-05-23
+
+description: |
+  Test template using all resources supported on the Rackspace Public Cloud
+
+parameters:
+
+  devops_flavor:
+    type: string
+    description: Flavor name for the devops server
+    default: 4 GB Performance
+    constraints:
+    - allowed_values:
+      - 4 GB Performance
+      - 4GB Standard Instance
+
+resources:
+
+  random_key_name:
+    type: OS::Heat::RandomString
+    properties:
+      length: 8
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_resource: random_key_name }
+      save_private_key: true
+
+  priv_network:
+    type: Rackspace::Cloud::Network
+    properties:
+      label: kitchen_sink
+      cidr: 192.168.0.0/24
+
+  boot_from_vol_vol:
+    type: OS::Cinder::Volume
+    properties:
+      name: bfv-vol
+      size: 100
+      volume_type: SSD
+      image: CentOS 7 (PVHVM)
+
+  boot_from_vol_server:
+    type: OS::Nova::Server
+    properties:
+      name: bfv-server-1
+      flavor: 2 GB Performance
+      block_device_mapping: [{volume_id: {get_resource: boot_from_vol_vol}, device_name: vda, delete_on_termination: false}]
+
+# Test attachement of volume using OS::Cinder::VolumeAttachment:
+
+  devops_server:
+    type: OS::Nova::Server
+    properties:
+      name: bfv-server-2 
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      image: 042395fc-728c-4763-86f9-9b0cacb00701 #CentOS 6.5
+      flavor: { get_param: devops_flavor }
+      key_name: { get_resource: access_key }
+      networks:
+      - uuid: "00000000-0000-0000-0000-000000000000"
+      - uuid: "11111111-1111-1111-1111-111111111111"
+      - uuid: { get_resource: priv_network }
+
+  devops_volume:
+    type: OS::Cinder::Volume
+    properties:
+      name: devops_vol
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      size: 100
+      description: Volume attached via the VolumeAttachment resource 
+
+  attach_devops_vol:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: devops_server }
+      volume_id: { get_resource: devops_volume }
+
+outputs:
+
+  "Private Network ID":
+    value: { get_resource: priv_network }
+    description: Private Network ID
+
+  "Server ID":
+    value: { get_resource: boot_from_vol_server }
+    description: Server ID
+
+  "Boot Volume ID":
+    value: { get_resource: boot_from_vol_vol }
+    description: Boot volume ID
+
+  "Volume Bootable":
+    value: { get_attr: [boot_from_vol_vol, bootable ] }
+    description: bootability of volume
+
+  "Cinder Attachments":
+    value: { get_attr: [boot_from_vol_vol, attachments ] }
+    description: attachments of volume
+
+  "Dev Ops Server ID":
+    value: { get_resource: devops_server }
+    description: Dev Ops Server ID
+
+  "Cinder Devops Server Attachments":
+    value: { get_attr: [devops_volume, attachments ] }
+    description: attachments of volume to devops_server

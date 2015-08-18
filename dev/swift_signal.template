@@ -1,0 +1,112 @@
+heat_template_version: 2013-05-23
+
+description: |
+  Test template using all resources supported on the Rackspace Public Cloud
+
+parameters:
+
+resources:
+
+  domain_name:
+    type: OS::Heat::RandomString
+
+  random_key_name:
+    type: OS::Heat::RandomString
+    properties:
+      length: 8
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_resource: random_key_name }
+      save_private_key: true
+
+  instance1:
+    type: OS::Nova::Server
+    properties:
+      image: 4b14a92e-84c8-4770-9245-91ecb8501cc2  # CentOS
+      flavor: 1 GB Performance
+      key_name: { get_resource: access_key }
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        heat-stack-name: { get_param: "OS::stack_name" }
+      config_drive: True
+#      networks:
+#      - uuid: "11111111-1111-1111-1111-111111111111"
+#      - uuid: { get_resource: neutron_network } 
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -x
+            # Below are some examples of the various ways signals
+            # can be sent to the Handle resource
+
+            # Simple success signal
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+
+            # Or you optionally can specify any of the additional fields
+            wc_notify --data-binary '{"status": "SUCCESS", "reason": "signal2"}'
+            wc_notify --data-binary '{"status": "SUCCESS", "reason": "signal3", "data": "data3"}'
+            wc_notify --data-binary '{"status": "SUCCESS", "reason": "signal4", "data": "data4"}'
+
+            # If you require control of the ID, you can pass it.
+            # The ID should be unique, unless you intend for duplicate
+            # signals to overrite each other.  The following two calls
+            # do the exact same thing, and will be treated as one signal
+            # (You can prove this by changing count above to 7)
+            wc_notify --data-binary '{"status": "SUCCESS", "id": "5"}'
+            wc_notify --data-binary '{"status": "SUCCESS", "id": "5"}'
+
+            # Example of sending a failure signal, optionally
+            # reason, id, and data can be specified as above
+            # wc_notify --data-binary '{"status": "FAILURE"}'
+
+          params:
+            wc_notify: { get_attr: ['wait_handle', 'curl_cli'] }
+
+  service_domain:
+    type: Rackspace::Cloud::DNS
+    depends_on: wait_on_server
+    properties:
+      name:
+        str_replace:
+          template: "a%domain%.com"
+          params:
+            "%domain%": { get_resource: domain_name }
+      emailAddress:
+        str_replace:
+          template: "admin@{domain}"
+          params:
+            "{domain}":
+              str_replace:
+                template: "a%domain%.com"
+                params:
+                  "%domain%": { get_resource: domain_name }
+
+  wait_on_server:
+    type: OS::Heat::SwiftSignal
+    properties:
+      handle: {get_resource: wait_handle}
+      count: 5
+      timeout: 600
+
+  wait_handle:
+    type: OS::Heat::SwiftSignalHandle
+
+outputs:
+
+  "Wait Condition data":
+     value: { get_attr: [ wait_on_server, data ] }
+
+  "DNS Domain ID":
+    value: { get_resource: service_domain }
+    description: DNS Domain ID
+
+  "Server ID":
+    value: { get_resource: instance1 }
+    description: Nova Server ID
+
+  "Server IP":
+    value: { get_attr: [ instance1, accessIPv4 ] }
+    description: Nova Server IPv4 

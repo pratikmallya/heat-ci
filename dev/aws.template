@@ -1,0 +1,89 @@
+heat_template_version: 2013-05-23
+
+description: |
+  Test template using all resources supported on the Rackspace Public Cloud
+
+parameters:
+
+  devops_flavor:
+    type: string
+    description: Flavor name for the devops server
+    default: 4 GB Performance
+    constraints:
+    - allowed_values:
+      - 4 GB Performance
+      - 4GB Standard Instance
+
+resources:
+
+  random_key_name:
+    type: OS::Heat::RandomString
+    properties:
+      length: 8
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_resource: random_key_name }
+      save_private_key: true
+
+  # This needs an image with heat_cfntools on it to use Metadata; basic
+  # test here to make sure we can actually pop the server and do simple
+  # user data and a signal
+  aws_server1:
+    type: AWS::EC2::Instance
+    properties:
+      ImageId: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      InstanceType: { get_param: devops_flavor }
+      KeyName: { get_resource: access_key }
+      UserData:
+        str_replace:
+          template: |
+            #!/bin/bash
+            apt-get update
+            apt-get -y install curl
+            sleep 2
+            curl -i -X PUT --data-binary '{"status": "SUCCESS", "reason": "AWS Signal"}' "wc_notify"
+          params:
+            wc_notify: { get_resource: aws_handle }
+  
+  aws_server2:
+    type: AWS::EC2::Instance
+    properties:
+      ImageId: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      InstanceType: { get_param: devops_flavor }
+      UserData: |
+        #!/bin/bash -x
+        echo "hello world" > /root/hello-world.txt
+
+  aws_handle:
+    type: AWS::CloudFormation::WaitConditionHandle
+  
+  aws_wait_condition:
+    type: AWS::CloudFormation::WaitCondition
+    properties:
+      Handle: { get_resource: aws_handle }
+      Timeout: 600
+
+  ElasticLoadBalancer:
+        type: AWS::ElasticLoadBalancing::LoadBalancer
+        properties:
+            AvailabilityZones: []
+            Instances: [ get_resource: aws_server1, get_resource: aws_server2 ]
+            Listeners: [{
+                LoadBalancerPort: 8945,
+                InstancePort: 80,
+                Protocol: "HTTP"
+            }]
+            HealthCheck:
+                Target: "HTTP:80/"
+                HealthyThreshold: 3
+                UnhealthyThreshold: 10
+                Interval: 10
+                Timeout: 60
+
+outputs:
+
+  "AWS Server ID":
+    value: { get_resource: aws_server }
+    description: ID of the AWS::EC2::Instance resource
