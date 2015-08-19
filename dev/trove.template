@@ -1,7 +1,7 @@
 heat_template_version: 2013-05-23
 
 description: |
-  Test template for Trove
+  Test template for Trove resource capabilities
 
 parameters:
   db_pass:
@@ -111,6 +111,15 @@ resources:
       - name: kitchen_sink
         password: { get_param: db_pass }
         databases: [ test_data ]
+
+  db_replica:
+    type: OS::Trove::Instance
+    properties:
+      name: trove_test_db_replica
+      flavor: 2GB Instance
+      size: 5
+      datastore_type: mariadb
+      replica_of: { get_resource: service_db }
 
 outputs:
 
