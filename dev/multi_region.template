@@ -8,7 +8,7 @@ resources:
       context:
         region_name: DFW
       template:
-        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.template
+        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.yaml
       timeout: 60
       parameters:
         region: DFW
@@ -19,7 +19,7 @@ resources:
       context:
         region_name: ORD
       template:
-        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.template
+        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.yaml
       timeout: 60
       parameters:
         region: ORD
@@ -30,7 +30,7 @@ resources:
       context:
         region_name: IAD
       template:
-        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.template
+        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.yaml
       timeout: 60
       parameters:
         region: IAD
@@ -41,7 +41,7 @@ resources:
       context:
         region_name: HKG
       template:
-        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.template
+        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.yaml
       timeout: 60
       parameters:
         region: HKG
@@ -52,7 +52,7 @@ resources:
       context:
         region_name: SYD
       template:
-        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.template
+        get_file: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/region_stack.yaml
       timeout: 60
       parameters:
         region: SYD
