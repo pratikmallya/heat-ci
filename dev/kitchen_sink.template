@@ -467,7 +467,7 @@ resources:
                 Timeout: 60
 
   provider_resource:
-    type: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/provider_resource.template
+    type: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/provider_resource.yaml
     properties:
       flavor: { get_param: devops_flavor }
       image: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
