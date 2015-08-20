@@ -1,31 +1,11 @@
-heat_template_version: 2013-05-23
+heat_template_version: 2014-10-16 
 
 description: |
-  Test template using all resources supported on the Rackspace Public Cloud
+  Test template for AWS supported resources 
 
 parameters:
 
-  devops_flavor:
-    type: string
-    description: Flavor name for the devops server
-    default: 4 GB Performance
-    constraints:
-    - allowed_values:
-      - 4 GB Performance
-      - 4GB Standard Instance
-
 resources:
-
-  random_key_name:
-    type: OS::Heat::RandomString
-    properties:
-      length: 8
-
-  access_key:
-    type: OS::Nova::KeyPair
-    properties:
-      name: { get_resource: random_key_name }
-      save_private_key: true
 
   # This needs an image with heat_cfntools on it to use Metadata; basic
   # test here to make sure we can actually pop the server and do simple
@@ -34,8 +14,7 @@ resources:
     type: AWS::EC2::Instance
     properties:
       ImageId: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
-      InstanceType: { get_param: devops_flavor }
-      KeyName: { get_resource: access_key }
+      InstanceType: 4 GB Performance 
       UserData:
         str_replace:
           template: |
@@ -47,15 +26,6 @@ resources:
           params:
             wc_notify: { get_resource: aws_handle }
   
-  aws_server2:
-    type: AWS::EC2::Instance
-    properties:
-      ImageId: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
-      InstanceType: { get_param: devops_flavor }
-      UserData: |
-        #!/bin/bash -x
-        echo "hello world" > /root/hello-world.txt
-
   aws_handle:
     type: AWS::CloudFormation::WaitConditionHandle
   
@@ -69,7 +39,7 @@ resources:
         type: AWS::ElasticLoadBalancing::LoadBalancer
         properties:
             AvailabilityZones: []
-            Instances: [ get_resource: aws_server1, get_resource: aws_server2 ]
+            Instances: [ get_resource: aws_server1 ]
             Listeners: [{
                 LoadBalancerPort: 8945,
                 InstancePort: 80,
@@ -85,5 +55,41 @@ resources:
 outputs:
 
   "AWS Server ID":
-    value: { get_resource: aws_server }
+    value: { get_resource: aws_server1 }
     description: ID of the AWS::EC2::Instance resource
+
+  "AWS EC2 Server AvailabilityZone":
+    value: { get_attr: [ aws_server1, AvailabilityZone ] }
+    description: AWS EC2 Server AvailabilityZone 
+
+  "AWS EC2 Server PrivateDnsName":
+    value: { get_attr: [ aws_server1, PrivateDnsName ] }
+    description: AWS EC2 Server PrivateDnsName 
+
+  "AWS EC2 Server PrivateIp":
+    value: { get_attr: [ aws_server1, PrivateIp ] }
+    description: AWS EC2 Server PrivateIp 
+
+  "AWS EC2 Server PublicDnsName":
+    value: { get_attr: [ aws_server1, PublicDnsName ] }
+    description: AWS EC2 Server PublicDnsName 
+
+  "AWS EC2 Server PublicIp":
+    value: { get_attr: [ aws_server1, PublicIp ] }
+    description: AWS EC2 Server PublicIp 
+
+  "AWS Cloud Formation Wait Condition":
+    value: { get_attr: [ aws_wait_condition, Data ] }
+    description: AWS Cloud Formation Wait Condition data 
+
+  "AWS ElasticLoadBalancer CanonicalHostedZoneName":
+    value: { get_attr: [ ElasticLoadBalancer, CanonicalHostedZoneName ] }
+    description: details the CanonicalHostedZoneName 
+
+  "AWS ElasticLoadBalancer CanonicalHostedZoneNameID":
+    value: { get_attr: [ ElasticLoadBalancer, CanonicalHostedZoneNameID ] }
+    description: details the CanonicalHostedZoneNameID 
+
+  "AWS ElasticLoadBalancer DNSName":
+    value: { get_attr: [ ElasticLoadBalancer, DNSName ] }
+    description: details the DNSName 

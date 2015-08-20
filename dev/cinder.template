@@ -1,37 +1,11 @@
-heat_template_version: 2013-05-23
+heat_template_version: 2014-10-16 
 
 description: |
-  Test template using all resources supported on the Rackspace Public Cloud
+  Test template for deploying Cinder resources 
 
 parameters:
 
-  devops_flavor:
-    type: string
-    description: Flavor name for the devops server
-    default: 4 GB Performance
-    constraints:
-    - allowed_values:
-      - 4 GB Performance
-      - 4GB Standard Instance
-
 resources:
-
-  random_key_name:
-    type: OS::Heat::RandomString
-    properties:
-      length: 8
-
-  access_key:
-    type: OS::Nova::KeyPair
-    properties:
-      name: { get_resource: random_key_name }
-      save_private_key: true
-
-  priv_network:
-    type: Rackspace::Cloud::Network
-    properties:
-      label: kitchen_sink
-      cidr: 192.168.0.0/24
 
   boot_from_vol_vol:
     type: OS::Cinder::Volume
@@ -57,12 +31,7 @@ resources:
       metadata:
         rax-heat: { get_param: "OS::stack_id" }
       image: 042395fc-728c-4763-86f9-9b0cacb00701 #CentOS 6.5
-      flavor: { get_param: devops_flavor }
-      key_name: { get_resource: access_key }
-      networks:
-      - uuid: "00000000-0000-0000-0000-000000000000"
-      - uuid: "11111111-1111-1111-1111-111111111111"
-      - uuid: { get_resource: priv_network }
+      flavor: 4 GB Performance 
 
   devops_volume:
     type: OS::Cinder::Volume
@@ -81,25 +50,69 @@ resources:
 
 outputs:
 
-  "Private Network ID":
-    value: { get_resource: priv_network }
-    description: Private Network ID
-
   "Server ID":
     value: { get_resource: boot_from_vol_server }
     description: Server ID
 
-  "Boot Volume ID":
+  "Cinder Boot Volume ID":
     value: { get_resource: boot_from_vol_vol }
     description: Boot volume ID
 
-  "Volume Bootable":
+  "Cinder Volume bootable":
     value: { get_attr: [boot_from_vol_vol, bootable ] }
     description: bootability of volume
 
-  "Cinder Attachments":
+  "Cinder Volume attachments":
     value: { get_attr: [boot_from_vol_vol, attachments ] }
     description: attachments of volume
+
+  "Cinder Volume availability_zone":
+    value: { get_attr: [boot_from_vol_vol, availability_zone ] }
+    description: availability_zone of volume
+
+  "Cinder Volume created_at":
+    value: { get_attr: [boot_from_vol_vol, created_at ] }
+    description: created_at attribute of volume
+
+  "Cinder Volume display_description":
+    value: { get_attr: [boot_from_vol_vol, display_description ] }
+    description: display_description attribute of volume
+
+  "Cinder Volume display_name":
+    value: { get_attr: [boot_from_vol_vol, display_name ] }
+    description: display_name attribute of volume
+
+  "Cinder Volume encrypted":
+    value: { get_attr: [boot_from_vol_vol, encrypted ] }
+    description: encrypted attribute of volume
+
+  "Cinder Volume metadata":
+    value: { get_attr: [boot_from_vol_vol, metadata ] }
+    description: metadata attribute of volume
+
+  "Cinder Volume metadata_values":
+    value: { get_attr: [boot_from_vol_vol, metadata_values ] }
+    description: metadata_values attribute of volume
+
+  "Cinder Volume size":
+    value: { get_attr: [boot_from_vol_vol, size ] }
+    description: size attribute of volume
+
+  "Cinder Volume snapshot_id":
+    value: { get_attr: [boot_from_vol_vol, snapshot_id ] }
+    description: snapshot_id attribute of volume
+
+  "Cinder Volume source_volid":
+    value: { get_attr: [boot_from_vol_vol, source_volid ] }
+    description: source_volid attribute of volume
+
+  "Cinder Volume status":
+    value: { get_attr: [boot_from_vol_vol, status ] }
+    description: status attribute of volume
+
+  "Cinder Volume volume_type":
+    value: { get_attr: [boot_from_vol_vol, volume_type ] }
+    description: volume_type attribute of volume
 
   "Dev Ops Server ID":
     value: { get_resource: devops_server }
