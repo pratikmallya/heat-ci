@@ -1,0 +1,123 @@
+heat_template_version: 2014-10-16 
+
+description: |
+  Test template for deploying Cinder resources 
+
+parameters:
+
+resources:
+
+  boot_from_vol_vol:
+    type: OS::Cinder::Volume
+    properties:
+      name: bfv-vol
+      size: 100
+      volume_type: SSD
+      image: CentOS 7 (PVHVM)
+
+  boot_from_vol_server:
+    type: OS::Nova::Server
+    properties:
+      name: bfv-server-1
+      flavor: 2 GB Performance
+      block_device_mapping: [{volume_id: {get_resource: boot_from_vol_vol}, device_name: vda, delete_on_termination: false}]
+
+# Test attachement of volume using OS::Cinder::VolumeAttachment:
+
+  devops_server:
+    type: OS::Nova::Server
+    properties:
+      name: bfv-server-2 
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      image: 042395fc-728c-4763-86f9-9b0cacb00701 #CentOS 6.5
+      flavor: 4 GB Performance 
+
+  devops_volume:
+    type: OS::Cinder::Volume
+    properties:
+      name: devops_vol
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      size: 100
+      description: Volume attached via the VolumeAttachment resource 
+
+  attach_devops_vol:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: devops_server }
+      volume_id: { get_resource: devops_volume }
+
+outputs:
+
+  "Server ID":
+    value: { get_resource: boot_from_vol_server }
+    description: Server ID
+
+  "Cinder Boot Volume ID":
+    value: { get_resource: boot_from_vol_vol }
+    description: Boot volume ID
+
+  "Cinder Volume bootable":
+    value: { get_attr: [boot_from_vol_vol, bootable ] }
+    description: bootability of volume
+
+  "Cinder Volume attachments":
+    value: { get_attr: [boot_from_vol_vol, attachments ] }
+    description: attachments of volume
+
+  "Cinder Volume availability_zone":
+    value: { get_attr: [boot_from_vol_vol, availability_zone ] }
+    description: availability_zone of volume
+
+  "Cinder Volume created_at":
+    value: { get_attr: [boot_from_vol_vol, created_at ] }
+    description: created_at attribute of volume
+
+  "Cinder Volume display_description":
+    value: { get_attr: [boot_from_vol_vol, display_description ] }
+    description: display_description attribute of volume
+
+  "Cinder Volume display_name":
+    value: { get_attr: [boot_from_vol_vol, display_name ] }
+    description: display_name attribute of volume
+
+  "Cinder Volume encrypted":
+    value: { get_attr: [boot_from_vol_vol, encrypted ] }
+    description: encrypted attribute of volume
+
+  "Cinder Volume metadata":
+    value: { get_attr: [boot_from_vol_vol, metadata ] }
+    description: metadata attribute of volume
+
+  "Cinder Volume metadata_values":
+    value: { get_attr: [boot_from_vol_vol, metadata_values ] }
+    description: metadata_values attribute of volume
+
+  "Cinder Volume size":
+    value: { get_attr: [boot_from_vol_vol, size ] }
+    description: size attribute of volume
+
+  "Cinder Volume snapshot_id":
+    value: { get_attr: [boot_from_vol_vol, snapshot_id ] }
+    description: snapshot_id attribute of volume
+
+  "Cinder Volume source_volid":
+    value: { get_attr: [boot_from_vol_vol, source_volid ] }
+    description: source_volid attribute of volume
+
+  "Cinder Volume status":
+    value: { get_attr: [boot_from_vol_vol, status ] }
+    description: status attribute of volume
+
+  "Cinder Volume volume_type":
+    value: { get_attr: [boot_from_vol_vol, volume_type ] }
+    description: volume_type attribute of volume
+
+  "Dev Ops Server ID":
+    value: { get_resource: devops_server }
+    description: Dev Ops Server ID
+
+  "Cinder Devops Server Attachments":
+    value: { get_attr: [devops_volume, attachments ] }
+    description: attachments of volume to devops_server

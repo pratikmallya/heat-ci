@@ -1,0 +1,39 @@
+heat_template_version: 2014-10-16 
+
+description: |
+  Test template for ResourceGroup resource capabilities 
+
+parameters:
+
+resources:
+
+  service_nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: 2
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: "service_engine_%index%"
+          image: 6f29d6a6-9972-4ae0-aa80-040fa2d6a9cf # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+          flavor: 4 GB Performance 
+          networks:
+          - uuid: "00000000-0000-0000-0000-000000000000"
+          - uuid: "11111111-1111-1111-1111-111111111111"
+          user_data: |
+            #!/bin/bash -x
+            echo "hello world" > /root/hello-world.txt
+
+outputs:
+
+  "Resource Group ID":
+    value: { get_resource: service_nodes }
+    description: Resource Group ID
+
+  "Resource IDs in Resource Group":
+    value: { get_attr: [ service_nodes, refs ] }
+    description: Resource IDs in Resource Group 
+
+  "Resource Group attributes":
+    value: { get_attr: [ service_nodes, attributes ] }
+    description: attributes of  Resource Group 
