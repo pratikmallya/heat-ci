@@ -1,0 +1,311 @@
+heat_template_version: 2014-10-16
+
+description: |
+  Your own personal Heat development environment!
+
+parameters:
+
+  keystone_admin_user:
+    type: string
+    default: orchestration-dev
+    description: admin user to verify auth tokens
+
+  keystone_admin_pass:
+    type: string
+    hidden: true
+    description: admin password to verify auth tokens
+    default: ''
+
+  target_datacenter:
+    type: string
+    description: Which datacenter should be used to deploy resources
+    default: IAD
+    constraints:
+    - allowed_values: [ IAD, DFW, ORD, HKG, SYD, LON ]
+
+  target_heat_build:
+    type: string
+    default: l1-20150723-gmaster-1467
+    description: heat build to use
+
+resources:
+  server_password:
+    type: OS::Heat::RandomString
+
+  mysql_password:
+    type: OS::Heat::RandomString
+
+  heat_mysql_password:
+    type: OS::Heat::RandomString
+
+  rabbit_password:
+    type: OS::Heat::RandomString
+
+  auth_encryption_key:
+    type: OS::Heat::RandomString
+
+  devbox:
+    type: OS::Nova::Server
+    properties:
+      image: Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      flavor:  4GB Standard Instance
+      admin_pass: { get_attr: [ server_password, value ] }
+      name: { get_param: "OS::stack_name" }
+      config_drive: true
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            output:
+              all: '| tee -a /var/log/cloud-init-output.log'
+            apt_upgrade: true
+            write_files:
+            - path: /root/.ssh/config
+              content: |
+                Host github.com
+                    StrictHostKeyChecking no
+            - path: /root/.ssh/id_rsa
+              permissions: "0700"
+              # have to paste your private key for talking to github here
+              # YAML FORMAT MATTERS!
+              content: |
+                -----BEGIN RSA PRIVATE KEY-----
+
+                -----END RSA PRIVATE KEY-----
+            - path: /root/.ssh/id_rsa.pub
+              permissions: "0700"
+              # paste the corresponding public key here as well - should be single line
+              content:
+            - path: /etc/heat/heat.conf
+              content: |
+                [DEFAULT]
+                # Show more verbose log output (sets INFO log level output)
+                verbose = True
+                # Show debugging output in logs (sets DEBUG log level output)
+                debug = True
+                # Turn off standard error logging
+                use_stderr = True
+                # Log to this file. Make sure the user running heat-api-cfn has
+                # permissions to write to this file!
+                log_file = /var/log/heat/service.log
+                # Send logs to syslog (/dev/log) instead of to file specified
+                # by `log_file`
+                use_syslog = False
+                # Facility to use. If unset defaults to LOG_USER.
+                # syslog_log_facility = LOG_LOCAL0
+                # Address to bind the server to
+                bind_host = 0.0.0.0
+                # Port the bind the server to
+                bind_port = 80
+                rpc_backend=heat.openstack.common.rpc.impl_kombu
+                rabbit_password=RABBIT_PASS
+                region_name_for_services=TARGET_DC
+                sql_connection = mysql://heat:HEAT_DB_PASS@localhost/heat
+                db_backend=heat.db.sqlalchemy.api
+                auth_encryption_key = AUTH_ENC_KEY
+                keystone_backend = heat.engine.plugins.heat_keystoneclient_v2.client.KeystoneClientV2
+                # keystone auth configuration
+                [keystone_authtoken]
+                identity_uri = https://identity.api.rackspacecloud.com
+                auth_version = v2.0
+                admin_tenant_name=
+                admin_user = KS_ADMIN
+                admin_password = KS_ADMIN_PASS
+                [revision]
+                heat_revision = STACK_NAME
+            - path: /etc/heat/environment.d/resource_registry.json
+              content: |
+                {
+                    "resource_registry": {
+                        "AWS::AutoScaling::*":,
+                        "AWS::CloudFormation::Stack":,
+                        "AWS::EC2::EIP":,
+                        "AWS::EC2::EIPAssociation":,
+                        "AWS::EC2::InternetGateway":,
+                        "AWS::EC2::NetworkInterface":,
+                        "AWS::EC2::RouteTable":,
+                        "AWS::EC2::SecurityGroup":,
+                        "AWS::EC2::Subnet":,
+                        "AWS::EC2::SubnetRouteTableAssociation":,
+                        "AWS::EC2::VPC":,
+                        "AWS::EC2::VPCGatewayAttachment":,
+                        "AWS::EC2::Volume":,
+                        "AWS::EC2::VolumeAttachment":,
+                        "AWS::IAM::*":,
+                        "AWS::S3::*":,
+                        "OS::Ceilometer::*":,
+                        "OS::Glance::*":,
+                        "OS::Heat::AccessPolicy":,
+                        "OS::Heat::AutoScalingGroup":,
+                        "OS::Heat::CWLiteAlarm":,
+                        "OS::Heat::CloudConfig":,
+                        "OS::Heat::HARestarter":,
+                        "OS::Heat::InstanceGroup":,
+                        "OS::Heat::MultipartMime":,
+                        "OS::Heat::ScalingPolicy":,
+                        "OS::Heat::SoftwareComponent":,
+                        "OS::Heat::SoftwareConfig":,
+                        "OS::Heat::SoftwareDeployment":,
+                        "OS::Heat::SoftwareDeployments":,
+                        "OS::Heat::StructuredConfig":,
+                        "OS::Heat::StructuredDeployment":,
+                        "OS::Heat::StructuredDeployments":,
+                        "OS::Heat::UpdateWaitConditionHandle":,
+                        "OS::Heat::WaitCondition":,
+                        "OS::Heat::WaitConditionHandle":,
+                        "OS::Neutron::Firewall":,
+                        "OS::Neutron::FirewallPolicy":,
+                        "OS::Neutron::FirewallRule":,
+                        "OS::Neutron::FloatingIP":,
+                        "OS::Neutron::FloatingIPAssociation":,
+                        "OS::Neutron::HealthMonitor":,
+                        "OS::Neutron::IKEPolicy":,
+                        "OS::Neutron::IPsecPolicy":,
+                        "OS::Neutron::IPsecSiteConnection":,
+                        "OS::Neutron::LoadBalancer":,
+                        "OS::Neutron::MeteringLabel":,
+                        "OS::Neutron::MeteringRule":,
+                        "OS::Neutron::NetworkGateway":,
+                        "OS::Neutron::Pool":,
+                        "OS::Neutron::PoolMember":,
+                        "OS::Neutron::ProviderNet":,
+                        "OS::Neutron::Router":,
+                        "OS::Neutron::RouterGateway":,
+                        "OS::Neutron::RouterInterface":,
+                        "OS::Neutron::SecurityGroup":,
+                        "OS::Neutron::VPNService":,
+                        "OS::Nova::FloatingIP":,
+                        "OS::Nova::FloatingIPAssociation":,
+                        "OS::Nova::ServerGroup":,
+                        "OS::Sahara::*":
+                    }
+                }
+            - path: /etc/heat/policy.json
+              content: |
+                {
+                    "context_is_admin":  "role:admin",
+                    "deny_stack_user": "not role:heat_stack_user",
+
+                    "actions:action": "rule:deny_stack_user",
+                    "build_info:build_info": "rule:deny_stack_user",
+                    "events:index": "rule:deny_stack_user",
+                    "events:show": "rule:deny_stack_user",
+                    "resource:index": "rule:deny_stack_user",
+                    "resource:metadata": "",
+                    "resource:show": "rule:deny_stack_user",
+                    "stacks:abandon": "rule:deny_stack_user",
+                    "stacks:create": "rule:deny_stack_user",
+                    "stacks:delete": "rule:deny_stack_user",
+                    "stacks:detail": "rule:deny_stack_user",
+                    "stacks:generate_template": "rule:deny_stack_user",
+                    "stacks:index": "rule:deny_stack_user",
+                    "stacks:list_resource_types": "rule:deny_stack_user",
+                    "stacks:lookup": "rule:deny_stack_user",
+                    "stacks:resource_schema": "rule:deny_stack_user",
+                    "stacks:show": "rule:deny_stack_user",
+                    "stacks:template": "rule:deny_stack_user",
+                    "stacks:update": "rule:deny_stack_user",
+                    "stacks:validate_template": "rule:deny_stack_user"
+                }
+            - path: /etc/heat/api-paste.ini
+              content: |
+                [DEFAULT]
+                auth_uri=https://identity.api.rackspacecloud.com/v2.0/
+
+                # heat-api pipeline
+                [pipeline:heat-api]
+                pipeline = faultwrap ssl versionnegotiation authurl authtoken context apiv1app
+
+                [app:apiv1app]
+                paste.app_factory = heat.common.wsgi:app_factory
+                heat.app_factory = heat.api.openstack.v1:API
+
+                [filter:versionnegotiation]
+                paste.filter_factory = heat.common.wsgi:filter_factory
+                heat.filter_factory = heat.api.openstack:version_negotiation_filter
+
+                [filter:faultwrap]
+                paste.filter_factory = heat.common.wsgi:filter_factory
+                heat.filter_factory = heat.api.openstack:faultwrap_filter
+
+                [filter:context]
+                paste.filter_factory = heat.common.context:ContextMiddleware_filter_factory
+
+                [filter:ssl]
+                paste.filter_factory = heat.common.wsgi:filter_factory
+                heat.filter_factory = heat.api.openstack:sslmiddleware_filter
+
+                # Middleware to set auth_url header appropriately
+                [filter:authurl]
+                paste.filter_factory = heat.common.auth_url:filter_factory
+
+                # Auth middleware that validates token against keystone
+                [filter:authtoken]
+                paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+            packages:
+            - screen
+            - git
+            - mysql-server
+            - rabbitmq-server
+            - libffi-dev
+            - libxml2-dev
+            - libxslt1-dev
+            - python-dev
+            - python-mysqldb
+            - python-launchpadlib
+            - vim
+            - libpq-dev
+            runcmd:
+            - curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | python
+            - wget https://bootstrap.pypa.io/ez_setup.py -O - | python
+            - rabbitmqctl change_password guest RABBIT_PASS
+            - mysqladmin -u root password MYSQL_PASS
+            - mysqladmin --password=MYSQL_PASS create heat
+            - mysql --password=MYSQL_PASS -e "CREATE USER heat@localhost IDENTIFIED BY 'HEAT_DB_PASS';"
+            - mysql --password=MYSQL_PASS -e "GRANT ALL PRIVILEGES on heat.* to heat@localhost;"
+            - mysqladmin --password=MYSQL_PASS reload
+            - mkdir -p /var/log/heat/
+            - touch /var/log/heat/service.log
+            - git config --global user.name "STACK_NAME"
+            - git config --global user.name "STACK_NAME@localhost"
+            - git clone -b HEAT_BUILD --single-branch git@github.com:rackerlabs/heat.git /root/heat
+            - pip install -r /root/heat/requirements.txt
+            - pip install -r /root/heat/local-requirements.txt
+            - pip install /root/heat
+            - pip install -r /root/heat/contrib/rackspace/requirements.txt
+            - cd /root/heat/contrib/rackspace && python setup.py install --install-data /usr
+            - pip install -r /root/heat/contrib/heat_docker/requirements.txt
+            - cd /root/heat/contrib/heat_docker && python setup.py install --install-data /usr
+            - cd /root/heat/bin && ./heat-manage db_sync
+
+          params:
+            RABBIT_PASS:   { get_attr: [ rabbit_password, value ] }
+            MYSQL_PASS:    { get_attr: [ mysql_password, value ] }
+            HEAT_DB_PASS:  { get_attr: [ heat_mysql_password, value ] }
+            KS_ADMIN:      { get_param: keystone_admin_user }
+            KS_ADMIN_PASS: { get_param: keystone_admin_pass }
+            AUTH_ENC_KEY:  { get_attr: [ auth_encryption_key, value ] }
+            STACK_NAME:    { get_param: "OS::stack_name" }
+            TARGET_DC:     { get_param: target_datacenter }
+            HEAT_BUILD:    { get_param: target_heat_build}
+
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        stack-name: { get_param: "OS::stack_name" }
+
+outputs:
+  server_password:
+    value: { get_attr: [ server_password, value ] }
+    description: server password
+
+  mysql_password:
+    value: { get_attr: [ mysql_password, value ] }
+    description: mysql password
+
+  rabbit_password:
+    value: { get_attr: [ rabbit_password, value ] }
+    description: rabbit password
+  server_ip:
+    value: { get_attr: [ devbox, accessIPv4 ] }
+    description: server ip address
