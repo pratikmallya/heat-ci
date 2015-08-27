@@ -16,7 +16,7 @@ resources:
       stackId:       HADOOP_HDP2_2
       clusterName:   { get_param: "OS::stack_name" }
       clusterLogin:  heatuser
-      flavor:        HADOOP_HDP2_2
+      flavor:        Small Hadoop Instance
       numSlaveNodes: 1
       publicKeyName: { get_param: "OS::stack_name" }
       publicKey: { get_attr: [ access_key, public_key ] }
