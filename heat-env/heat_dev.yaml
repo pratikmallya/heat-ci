@@ -25,7 +25,7 @@ parameters:
 
   target_heat_build:
     type: string
-    default: l1-20150723-gmaster-1467
+    default: PRODUCTION
     description: heat build to use
 
 resources:
