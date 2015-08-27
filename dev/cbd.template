@@ -1,0 +1,32 @@
+heat_template_version: 2015-10-15
+
+description: |
+  This is a Heat template to deploy a Rackspace Cloud Big Data Hadoop cluster.
+
+resources:
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_param: "OS::stack_name" }
+
+  cbd_cluster:
+    type: "Rackspace::Cloud::BigData"
+    properties:
+      stackId:       HADOOP_HDP2_2
+      clusterName:   { get_param: "OS::stack_name" }
+      clusterLogin:  heatuser
+      flavor:        HADOOP_HDP2_2
+      numSlaveNodes: 1
+      publicKeyName: { get_param: "OS::stack_name" }
+      publicKey: { get_attr: [ access_key, public_key ] }
+
+outputs:
+
+  cluster_id:
+    value: { get_resource: cbd_cluster }
+    description: Cloud Big Data Cluster ID
+
+  cbd_version:
+    value: { get_attr: [cbd_cluster, cbdVersion] }
+    description: Cloud Big Data version
