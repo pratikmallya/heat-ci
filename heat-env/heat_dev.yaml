@@ -243,6 +243,19 @@ resources:
                 # Auth middleware that validates token against keystone
                 [filter:authtoken]
                 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+            - path: /root/startheat.sh
+              permissions: "0700"
+              content: |
+                #!/bin/bash
+                screen -S HEAT_ENGINE -d -m heat-engine
+                screen -S HEAT_API -d -m heat-api
+                tail -F /var/log/heat/service.log
+            - path: /root/stopheat.sh
+              permissions: "0700"
+              content: |
+                #!/bin/bash
+                killall screen
+                killall /usr/bin/python
             packages:
             - screen
             - git
