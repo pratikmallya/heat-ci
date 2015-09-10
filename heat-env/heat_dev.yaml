@@ -288,6 +288,8 @@ resources:
             - pip install /root/heat
             - pip install -r /root/heat/contrib/rackspace/requirements.txt
             - cd /root/heat/contrib/rackspace && python setup.py install --install-data /usr
+            - pip install -r /root/heat/contrib/cbd_heat_plugin/requirements.txt
+            - cd /root/heat/contrib/cbd_heat_plugin && python setup.py install --install-data /usr
             - pip install -r /root/heat/contrib/heat_docker/requirements.txt
             - cd /root/heat/contrib/heat_docker && python setup.py install --install-data /usr
             - cd /root/heat/bin && ./heat-manage db_sync
