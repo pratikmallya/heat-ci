@@ -295,6 +295,8 @@ resources:
             - pip install /root/heat
             - pip install -r /root/heat/contrib/rackspace/requirements.txt
             - cd /root/heat/contrib/rackspace && python setup.py install --install-data /usr
+            - pip install -r /root/heat/contrib/rax-heat-ext/requirements.txt
+            - cd /root/heat/contrib/rax-heat-ext && python setup.py install --install-data /usr
             - pip install -r /root/heat/contrib/cbd_heat_plugin/requirements.txt
             - cd /root/heat/contrib/cbd_heat_plugin && python setup.py install --install-data /usr
             - pip install -r /root/heat/contrib/heat_docker/requirements.txt
