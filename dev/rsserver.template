@@ -4,12 +4,15 @@ description: |
   Test Rackspace::Cloud::Server and Fedora images
 
 resources:
+  server_password:
+    type: OS::Heat::RandomString
 
   fedora-21:
     type: Rackspace::Cloud::Server
     properties:
       image: Fedora 21 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name: 
         str_replace:
           template: stack-f21
@@ -27,6 +30,7 @@ resources:
     properties:
       image: Fedora 22 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name:
         str_replace:
           template: stack-f22
@@ -44,6 +48,7 @@ resources:
     properties:
       image: Red Hat Enterprise Linux 6 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name: 
         str_replace:
           template: stack-rhel-6
@@ -61,6 +66,7 @@ resources:
     properties:
       image: Red Hat Enterprise Linux 7 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name: 
         str_replace:
           template: stack-rhel-7
@@ -78,6 +84,7 @@ resources:
     properties:
       image: CentOS 6 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name: 
         str_replace:
           template: stack-centos-6
@@ -95,6 +102,7 @@ resources:
     properties:
       image: CentOS 7 (PVHVM)
       flavor: 1 GB Performance
+      admin_pass: { get_attr: [ server_password, value ] }
       name: 
         str_replace:
           template: stack-centos-7
@@ -124,9 +132,6 @@ outputs:
   centos-7:
     value: { get_attr: [ centos-7, accessIPv4 ] }
 
-      
-
-
-      
-      
-    
+  server_password:
+    value: { get_attr: [ server_password, value ] }
+    description: server password
