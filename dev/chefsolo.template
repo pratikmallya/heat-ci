@@ -36,7 +36,7 @@ resources:
     properties:
        private_key: {get_attr: [access_key, private_key]}
        host: {get_attr: [devops_server, accessIPv4]}
-       kitchen: "https://github.com/heat-ci/heat-templates.git"
+       kitchen: "https://github.com/rackerlabs/heat-ci.git"
        node:
          hello: "hi"
 
