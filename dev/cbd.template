@@ -13,7 +13,7 @@ resources:
   cbd_cluster:
     type: "Rackspace::Cloud::BigData"
     properties:
-      stackId:       HADOOP_HDP2_2
+      stackId:       HADOOP_HDP2_3
       clusterName:   { get_param: "OS::stack_name" }
       clusterLogin:  heatuser
       flavor:        Small Hadoop Instance
