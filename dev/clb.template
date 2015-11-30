@@ -1,0 +1,105 @@
+heat_template_version: 2014-10-16
+
+parameters:
+  certificate:
+    type: string
+    default: |
+      -----BEGIN CERTIFICATE-----
+      MIIEmjCCA4KgAwIBAgIJAIt7AFXsNbUkMA0GCSqGSIb3DQEBBQUAMIGOMQswCQYD
+      VQQGEwJVUzEOMAwGA1UECBMFVGV4YXMxDzANBgNVBAcTBkF1c3RpbjESMBAGA1UE
+      ChMJUmFja3NwYWNlMQwwCgYDVQQLEwNJUEExEDAOBgNVBAMTB0hlYXQgUWUxKjAo
+      BgkqhkiG9w0BCQEWG3ByYXRpay5tYWxseWFAcmFja3NwYWNlLmNvbTAgFw0xNTEx
+      MzAwNTUwNTdaGA80NzUzMTAyNjA1NTA1N1owgY4xCzAJBgNVBAYTAlVTMQ4wDAYD
+      VQQIEwVUZXhhczEPMA0GA1UEBxMGQXVzdGluMRIwEAYDVQQKEwlSYWNrc3BhY2Ux
+      DDAKBgNVBAsTA0lQQTEQMA4GA1UEAxMHSGVhdCBRZTEqMCgGCSqGSIb3DQEJARYb
+      cHJhdGlrLm1hbGx5YUByYWNrc3BhY2UuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOC
+      AQ8AMIIBCgKCAQEAzaPoyingZOY2saL8kfWrI2Kv9mxw3SysXBjRX45h7am5HLnA
+      btGuUXZmxRec7cWpbdxyGF2vN+6lKE+MpRrky6YGUGqM9+Wr6mHPFJkFuT3WqwBg
+      flPppvb2iyrmHkKw6X1chpp/K9DDp8cEIMOnBKdwX6vf1zPMX9D0R82okVeCTo3T
+      sAwJoTrNgN49aKWpMwuJaNU8MmHTEc49Fzj9pRv4EutSOQaIRGW2PoV2f7qzkmMv
+      218Ip7/nafm2zeD045wDPSQDa7SvQ6WRtr40xy0FGJ69r1HUEcZgMr5RJ8X/SY5Y
+      ed9Hzk/C0pKI9tg0VB+MUeAwPYl3P1cdzjRX1QIDAQABo4H2MIHzMB0GA1UdDgQW
+      BBQWQvxZk9H8PUphy0/sJrGMqlfYfzCBwwYDVR0jBIG7MIG4gBQWQvxZk9H8PUph
+      y0/sJrGMqlfYf6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxDjAMBgNVBAgTBVRleGFz
+      MQ8wDQYDVQQHEwZBdXN0aW4xEjAQBgNVBAoTCVJhY2tzcGFjZTEMMAoGA1UECxMD
+      SVBBMRAwDgYDVQQDEwdIZWF0IFFlMSowKAYJKoZIhvcNAQkBFhtwcmF0aWsubWFs
+      bHlhQHJhY2tzcGFjZS5jb22CCQCLewBV7DW1JDAMBgNVHRMEBTADAQH/MA0GCSqG
+      SIb3DQEBBQUAA4IBAQCQY6mN42JNVfLyjk/fVx0QQfs8vsFRVi/J7qtYiKGPKmrc
+      H3pW5V/uWeca/XCm+gd+DqmTkRZ7ikvDJz+90mqztCFBvPs7eT/rZQ5n3rhw5fPf
+      /1b9M4QIrHq3gTVM6eeyaeqcDeUckAnVQjNPG4GHPUC6un1d/oY1cGhz6k47XaBO
+      3O4UgfBcgO4XsF1KAXUtx6qPp+zJ1q2PevwbV8g6PgZShYeIgo8Fsu4gzDdpbAso
+      UgZyEBmXsK57drRP8qINLHKhrdKeDdbx1mpc448TubqqgDF5vnPRH/L7BJBI81i1
+      4qZLadqgnH1hNCr+yFhskirwmKZsYXxJx4Y01nMx
+      -----END CERTIFICATE-----
+
+  private_key:
+    type: string
+    default: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAzaPoyingZOY2saL8kfWrI2Kv9mxw3SysXBjRX45h7am5HLnA
+      btGuUXZmxRec7cWpbdxyGF2vN+6lKE+MpRrky6YGUGqM9+Wr6mHPFJkFuT3WqwBg
+      flPppvb2iyrmHkKw6X1chpp/K9DDp8cEIMOnBKdwX6vf1zPMX9D0R82okVeCTo3T
+      sAwJoTrNgN49aKWpMwuJaNU8MmHTEc49Fzj9pRv4EutSOQaIRGW2PoV2f7qzkmMv
+      218Ip7/nafm2zeD045wDPSQDa7SvQ6WRtr40xy0FGJ69r1HUEcZgMr5RJ8X/SY5Y
+      ed9Hzk/C0pKI9tg0VB+MUeAwPYl3P1cdzjRX1QIDAQABAoIBAG6TPJG4gti+kZpj
+      MbyqhSO55TR0ixvi8at0DOF9BlttcARqPXdZeIqFSC2izNdt+fUBHLjNZ3KD+Hr8
+      i3wcQfrfg3WqVbLW5OJbRaalwdYh0lSRF1HWfUUyds/OeX68DbT/m8klOkytLQgC
+      k82qZxyxjFNlcC+fwr2i9jfF9mZv2PCHaNsCLnmi9tn00KNc70UOKzrOwAG0Wdi8
+      L8M+qbqkIvRg6UCctmWyw6GA2+I/uJlKml1o7frrM5QtYrioRfQiD4KhshoWsX8G
+      q1/szMyKzjHB+ajbRKolm0zyOM0SLw40nuYiMR825UnOpr9/qcIziZKyuoLd/GQC
+      ejovUeECgYEA6UugARsw5yAO99wqaJfvnA3X7GJj8/VXSpr6/B+gvuW2lVGOhEId
+      6Tm6QWDNTXZ0Ic7QQudM1M37cszFAVtWmt2conu5jSUAJ5rQHu+rmntJ55X0GPFt
+      K64PrLHpLS+24+p7xWH8+9r7+FMogxJoIy85vEmzzOTtIsKADRniI/MCgYEA4adH
+      IvAiQfnAQjnb6Y+yfLaRWiB2yGFj1MqVlt3NgErykQMBWPdjbVXOFXeTzH5LbjCT
+      bA1xmqEncAcHGIyN9wUvEIWMQEJXOmHQqli1pCqW9rbLkgIG9s50s0CTFEhpVKuz
+      WAcUoV7XY/nzoxvkShWERFWcR/22xzGWoK5wrxcCgYASBeSjkT0y7dgaL+ka0XoS
+      XUNsIKHGLBMFUXnIVo0tkkOLv5Q6BX2YEfygpmDV9iu8nOSb9pCJ9CvTz5v8odjL
+      +AjsyJAqJkyfwqcHbM6eDZ5FBOGpt6UOddECL3BrLD991hSfyBUqQ92pbos3rQlc
+      hn54XF1Gm/zx7YLFAFXnHwKBgQCXPl1Jp5Xujo00Vj91nmDNgjiOJfA3gj89YsM8
+      qVGRyaonU9JVZQr5P2evr8QabhP0uQ42gBRCxfz+81boN1z30junYTuN3mlEskb/
+      xhGJBRrGJeLv6/fq+JnzgzaRg69FlwfP2n8TYdQQKHoKOymaFi3e91qWThFyFWSW
+      MhVI5QKBgCXhsuzvkoX2oQxyC7Dje3J9p0dBmYbe0FS2zB8p9opBTNPiVgNiJxW0
+      3zuTnce83+XIW+NDCnUbjfRoLNcFEn5MU5PXxrGsVB4T2h37Z37yntOilDODxZx/
+      f6kJgi2DOcfG6E3RKcFnQZ3SDwSrX+xqkbMDp1gZUdZHmixmvJ7m
+      -----END RSA PRIVATE KEY-----
+
+resources:
+  elkstack_loadbalancer:
+    type: Rackspace::Cloud::LoadBalancer
+    properties:
+      name: 'web-lb'
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+      nodes: []
+      healthMonitor:
+        type: CONNECT
+        delay: 5
+        timeout: 5
+        attemptsBeforeDeactivation: 2
+      contentCaching: DISABLED
+      protocol: HTTP
+      port: 80
+      sslTermination:
+        secureTrafficOnly: false
+        securePort: 443
+        certificate: { get_param: 'certificate' }
+        privatekey: { get_param: 'private_key' }
+      errorPage: |
+        <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Rackspace International DevOps</title>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+          <body style="font-family: 'Source Sans Pro'; font-weight: 400; margin: 0; line-height: 1; text-align: center; color: #323232;">
+            <div style="font-size: 16px; margin-bottom: 15px;">
+              <center>
+                <h2 class="rs-page-title" style="font-family: 'Source Sans Pro', 'Helvetica Neue', sans-serif; font-weight: 600; line-height: 30px; font-size: 28px; margin: 0px 0px 20px; color: rgb(196, 0, 34);">Work in progress..</h2>
+                <p><img alt="" src="https://313fb049056b89842179-51bb03faf63e8cb2b2449d4f9d26cb1f.ssl.cf3.rackcdn.com/devops-logo.png" style="border-width: 0px; border-style: solid; 640px; height: 732px;" /></p>
+              </center>
+            </div>
+          </body>
+        </html>
+      algorithm: LEAST_CONNECTIONS
+      virtualIps:
+        - {"type": "PUBLIC", "ipVersion": "IPV4"}
