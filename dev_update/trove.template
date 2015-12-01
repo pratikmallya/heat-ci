@@ -1,0 +1,62 @@
+heat_template_version: 2014-10-16 
+
+description: |
+  Test template for Trove resource capabilities
+
+parameters:
+  db_pass:
+    type: string
+    hidden: true
+    description: Database access password
+    default: secrete
+
+resources:
+
+  service_db:
+    type: OS::Trove::Instance
+    properties:
+      name: trove_test_db
+      datastore_type: mariadb
+      flavor: 1GB Instance
+      size: 10
+      databases:
+      - name: test_data
+      users:
+      - name: kitchen_sink
+        password: { get_param: db_pass }
+        databases: [ test_data ]
+
+  db_replica:
+    type: OS::Trove::Instance
+    properties:
+      name: trove_test_db_replica
+      flavor: 2GB Instance
+      size: 5
+      datastore_type: mariadb
+      replica_of: { get_resource: service_db }
+
+outputs:
+
+  "Master DB ID":
+    value: { get_resource: service_db }
+    description: Database instance ID
+
+  "Master DB hostname":
+    value: { get_attr: [ service_db, hostname ] }
+    description: Hostname of Master DB 
+
+  "Master DB API endpoint":
+    value: { get_attr: [ service_db, href ] }
+    description: Api endpoint 
+
+  "Slave DB ID":
+    value: { get_resource: db_replica }
+    description: Database instance ID
+
+  "Slave DB hostname":
+    value: { get_attr: [ db_replica, hostname ] }
+    description: Hostname of Slave DB 
+
+  "Slave DB API endpoint":
+    value: { get_attr: [ db_replica, href ] }
+    description: Api endpoint 
