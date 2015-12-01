@@ -1,0 +1,28 @@
+heat_template_version: 2014-10-16 
+
+description: |
+  Test template for using an imported provider resource 
+
+parameters:
+
+resources:
+
+  random_key_name:
+    type: OS::Heat::RandomString
+    properties:
+      length: 8
+
+  access_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_resource: random_key_name }
+      save_private_key: true
+
+  provider_resource:
+    type: https://raw.githubusercontent.com/rackerlabs/heat-ci/master/dev/provider_resource.yaml
+    properties:
+      flavor: 4 GB Performance 
+      image: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      key_name: { get_resource: access_key }
+
+outputs:

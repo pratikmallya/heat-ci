@@ -1,0 +1,95 @@
+heat_template_version: 2014-10-16 
+
+description: |
+  Test template for AWS supported resources 
+
+parameters:
+
+resources:
+
+  # This needs an image with heat_cfntools on it to use Metadata; basic
+  # test here to make sure we can actually pop the server and do simple
+  # user data and a signal
+  aws_server1:
+    type: AWS::EC2::Instance
+    properties:
+      ImageId: 753a7703-4960-488b-aab4-a3cdd4b276dc # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      InstanceType: 4 GB Performance 
+      UserData:
+        str_replace:
+          template: |
+            #!/bin/bash
+            apt-get update
+            apt-get -y install curl
+            sleep 2
+            curl -i -X PUT --data-binary '{"status": "SUCCESS", "reason": "AWS Signal"}' "wc_notify"
+          params:
+            wc_notify: { get_resource: aws_handle }
+  
+  aws_handle:
+    type: AWS::CloudFormation::WaitConditionHandle
+  
+  aws_wait_condition:
+    type: AWS::CloudFormation::WaitCondition
+    properties:
+      Handle: { get_resource: aws_handle }
+      Timeout: 600
+
+  ElasticLoadBalancer:
+        type: AWS::ElasticLoadBalancing::LoadBalancer
+        properties:
+            AvailabilityZones: []
+            Instances: [ get_resource: aws_server1 ]
+            Listeners: [{
+                LoadBalancerPort: 8945,
+                InstancePort: 80,
+                Protocol: "HTTP"
+            }]
+            HealthCheck:
+                Target: "HTTP:80/"
+                HealthyThreshold: 3
+                UnhealthyThreshold: 10
+                Interval: 10
+                Timeout: 60
+
+outputs:
+
+  "AWS Server ID":
+    value: { get_resource: aws_server1 }
+    description: ID of the AWS::EC2::Instance resource
+
+  "AWS EC2 Server AvailabilityZone":
+    value: { get_attr: [ aws_server1, AvailabilityZone ] }
+    description: AWS EC2 Server AvailabilityZone 
+
+  "AWS EC2 Server PrivateDnsName":
+    value: { get_attr: [ aws_server1, PrivateDnsName ] }
+    description: AWS EC2 Server PrivateDnsName 
+
+  "AWS EC2 Server PrivateIp":
+    value: { get_attr: [ aws_server1, PrivateIp ] }
+    description: AWS EC2 Server PrivateIp 
+
+  "AWS EC2 Server PublicDnsName":
+    value: { get_attr: [ aws_server1, PublicDnsName ] }
+    description: AWS EC2 Server PublicDnsName 
+
+  "AWS EC2 Server PublicIp":
+    value: { get_attr: [ aws_server1, PublicIp ] }
+    description: AWS EC2 Server PublicIp 
+
+  "AWS Cloud Formation Wait Condition":
+    value: { get_attr: [ aws_wait_condition, Data ] }
+    description: AWS Cloud Formation Wait Condition data 
+
+  "AWS ElasticLoadBalancer CanonicalHostedZoneName":
+    value: { get_attr: [ ElasticLoadBalancer, CanonicalHostedZoneName ] }
+    description: details the CanonicalHostedZoneName 
+
+  "AWS ElasticLoadBalancer CanonicalHostedZoneNameID":
+    value: { get_attr: [ ElasticLoadBalancer, CanonicalHostedZoneNameID ] }
+    description: details the CanonicalHostedZoneNameID 
+
+  "AWS ElasticLoadBalancer DNSName":
+    value: { get_attr: [ ElasticLoadBalancer, DNSName ] }
+    description: details the DNSName 
