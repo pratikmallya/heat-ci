@@ -4,6 +4,8 @@ description: |
   Testing Docker resource
 
 resources:
+  server_password:
+    type: OS::Heat::RandomString
 
   ##################################
   # CoreOS host for the containers #
@@ -20,6 +22,7 @@ resources:
       image: CoreOS (Alpha)
       flavor: 4 GB Performance
       config_drive: true
+      admin_pass: { get_attr: [ server_password, value ] }
       user_data_format: RAW
       # Expose the docker rest API on the CoreOS machine (not secure)
       # user data copied from:
@@ -167,3 +170,6 @@ outputs:
     description: Status of the WordPress container
     value: { get_attr: [ wpcontainer, info, State ] }
 
+  server_password:
+    value: { get_attr: [ server_password, value ] }
+    description: server password
