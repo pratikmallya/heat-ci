@@ -291,6 +291,7 @@ resources:
             - git config --global user.name "STACK_NAME@localhost"
             - git clone -b HEAT_BUILD --single-branch git@github.com:rackerlabs/heat.git /root/heat
             - pip install -r /root/heat/requirements.txt
+            - pip install -r /root/heat/test-requirements.txt
             - pip install -r /root/heat/local-requirements.txt
             - pip install /root/heat
             - pip install -r /root/heat/contrib/rackspace/requirements.txt
