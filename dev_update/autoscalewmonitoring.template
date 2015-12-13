@@ -33,7 +33,7 @@ parameters:
       for the scaled servers is set up to use Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM). If
       you wish to pass in a different image, be sure to adjust the user data as
       appropriate.
-    default: 598a4282-f14b-4e50-af4c-b3e52749d9f9 # Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+    default: CentOS 5 (PV)
     constraints:
     - custom_constraint: glance.image
 
